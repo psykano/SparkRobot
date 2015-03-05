@@ -2,6 +2,7 @@
 #include "NetworkPinHandler.h"
 
 #define DEBUG
+#define VERBOSE
 
 // Modify these to your liking
 const int RECONNECT_DELAY = 3000;
@@ -95,7 +96,7 @@ void connected() {
   }
   // Entire message is in buffer
   if (read == DELIMITER) {
-#ifdef DEBUG
+#if defined(DEBUG) && defined(VERBOSE)
     Serial.print("Received: ");
     for (unsigned int i = 0; i < receiveMsgLength; ++i) {
       Serial.print((char)receiveMsg[i]);
@@ -128,7 +129,7 @@ void sendMessage(const uint8_t* message, size_t messageLength) {
       memcpy(sendMsg, message, messageLength);
       sendMsg[messageLength] = DELIMITER;
       client.write(sendMsg, messageLength + 1);
-#ifdef DEBUG
+#if defined(DEBUG) && defined(VERBOSE)
       Serial.print("Sent: ");
       for (unsigned int i = 0; i < messageLength; ++i) {
         Serial.print((char)sendMsg[i]);
