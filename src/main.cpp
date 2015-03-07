@@ -39,6 +39,7 @@ void setup() {
 #endif
 
   pinHandler.setDigitalPin(7, OUTPUT_PIN);
+  pinHandler.setSendMessage(sendMessage);
 
   // Ready to receive first message
   receiveMsgLength = 0;
@@ -54,7 +55,7 @@ void loop() {
   curMillis = millis();
   dt = (curMillis - prevMillis) / 1000.0f;
   prevMillis = curMillis;
-  
+
   if (dt >= SLOW_DT) {
     Serial.print("Warning: slow update rate of ");
     Serial.print(dt);
