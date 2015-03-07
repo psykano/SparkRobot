@@ -2,6 +2,7 @@
 #define NETWORK_PIN_HANDLER_H
 
 #include "application.h"
+#include "SparkRobotSettings.h"
 
 // Spark core pinout
 const int DIGITAL_PINS = 8;

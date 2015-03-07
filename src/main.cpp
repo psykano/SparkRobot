@@ -1,8 +1,6 @@
 #include "application.h"
 #include "NetworkPinHandler.h"
-
-#define DEBUG
-#define VERBOSE
+#include "SparkRobotSettings.h"
 
 // Modify these to your liking
 const int RECONNECT_DELAY = 3000;
@@ -56,7 +54,7 @@ void loop() {
   curMillis = millis();
   dt = (curMillis - prevMillis) / 1000.0f;
   prevMillis = curMillis;
-
+  
   if (dt >= SLOW_DT) {
     Serial.print("Warning: slow update rate of ");
     Serial.print(dt);

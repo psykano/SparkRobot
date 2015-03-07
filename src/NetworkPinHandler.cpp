@@ -87,10 +87,29 @@ void NetworkPinHandler::readMessage(const uint8_t* msg, size_t size) {
           } else {
             analogWrite(ANALOG_PIN[pinNum], outputNum);
           }
-        } // end analog number validation
+        } // end analog value validation
+#ifdef DEBUG
+        else {
+          Serial.print("Error: invalid value to write to pin ");
+          Serial.print(pinNum);
+          Serial.println(".");
+        }
+#endif
       } // end analog write
     } // end pin number validation
+#ifdef DEBUG
+    else {
+      Serial.print("Error: can't write to pin ");
+      Serial.print(pinNum);
+      Serial.println(".");
+    }
+#endif
   } // end message first char and size validation
+#if defined(DEBUG) && defined(VERBOSE)
+  else {
+    Serial.println("Error: invalid message.");
+  }
+#endif
 }
 
 void NetworkPinHandler::sendDigitalRead(unsigned int pinNumber) {
