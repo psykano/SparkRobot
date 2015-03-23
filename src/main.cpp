@@ -8,13 +8,18 @@ const unsigned int RECONNECT_DELAY = 3000;
 const unsigned int MAX_MESSAGE_LENGTH = 100;
 const unsigned int READ_BUFFER_LENGTH = 100;
 const char DELIMITER = '\n';
+
 const IPAddress SERVER_IP(192,168,1,198);
 const unsigned int SERVER_TCP_PORT = 11999;
 const unsigned int SERVER_UDP_PORT = 11998;
 const unsigned int CLIENT_UDP_PORT = 9000;
+const uint8_t CONNECT_MSG[] = "connect\n";
+const size_t CONNECT_MSG_SIZE = 8;
+const uint8_t ACK_MSG[] = "connected\n";
 
 TCPClient tcpClient;
 UDPClient udpClient;
+
 int read;
 uint8_t readBuffer[READ_BUFFER_LENGTH];
 uint8_t tcpReceiveMsg[MAX_MESSAGE_LENGTH];
@@ -136,7 +141,7 @@ void disconnected() {
     Serial.print(SERVER_UDP_PORT);
     Serial.println("...");
 #endif
-    if (udpClient.connect(SERVER_IP, SERVER_UDP_PORT)) {
+    if (udpClient.connect(SERVER_IP, SERVER_UDP_PORT, CONNECT_MSG, CONNECT_MSG_SIZE, ACK_MSG)) {
 #ifdef DEBUG
       Serial.println("Connected to UDP server.");
 #endif
@@ -189,7 +194,35 @@ void connected() {
   // Receive from UDP server
   {
     if (udpClient.buffer()) {
-      udpClient.read(); // TODO
+      // Read message from server into buffer
+      read = udpClient.read();
+      while (read > 0 && read != DELIMITER && udpReceiveMsgLength != MAX_MESSAGE_LENGTH) {
+        udpReceiveMsg[udpReceiveMsgLength++] = read;
+        read = udpClient.read();
+      }
+      // Entire message is in buffer
+      if (read == DELIMITER) {
+#if defined(DEBUG) && defined(VERBOSE)
+        Serial.print("Received via UDP: ");
+        for (unsigned int i = 0; i < udpReceiveMsgLength; ++i) {
+          Serial.print((char)udpReceiveMsg[i]);
+        }
+        Serial.println();
+#endif
+
+        // Parse message
+        pinHandler.readMessage(udpReceiveMsg, udpReceiveMsgLength);
+
+        // Ready to receive next message
+        udpReceiveMsgLength = 0;
+      } else if (udpReceiveMsgLength == MAX_MESSAGE_LENGTH) {
+        // Disregard broken message and get ready to receive next message
+        read = udpClient.read();
+        while (read != -1 && read != DELIMITER) {
+          read = udpClient.read();
+        }
+        udpReceiveMsgLength = 0;
+      }
     }
 /*
     while (udpClient.read(readBuffer, READ_BUFFER_LENGTH)) {
